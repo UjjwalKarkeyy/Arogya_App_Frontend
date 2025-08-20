@@ -216,6 +216,9 @@ export default function HomeScreen() {
           ))}
         </View>
       </View>
+      <View>
+
+      </View>
     </View>
   );
 }
