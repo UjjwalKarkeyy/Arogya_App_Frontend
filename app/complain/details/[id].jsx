@@ -30,7 +30,7 @@ export default function ComplainDetails() {
   // Fetch complaint details
   const fetchComplaintDetails = async () => {
     try {
-      const apiUrl = `${API_BASE_URL}/api/complains/${id}/`;
+      const apiUrl = `${API_BASE_URL}/complains/${id}/`;
       const response = await axios.get(apiUrl);
       setComplaint(response.data);
       setLoading(false);
@@ -44,7 +44,7 @@ export default function ComplainDetails() {
   // Fetch comments from backend
   const fetchComments = async () => {
     try {
-      const apiUrl = `${API_BASE_URL}/api/complains/${id}/comments/`;
+      const apiUrl = `${API_BASE_URL}/complains/${id}/comments/`;
       const response = await axios.get(apiUrl);
       setComments(response.data);
     } catch (error) {
@@ -69,7 +69,7 @@ export default function ComplainDetails() {
         parent: replyTo
       };
 
-      const apiUrl = `${API_BASE_URL}/api/complains/${id}/add_comment/`;
+      const apiUrl = `${API_BASE_URL}/complains/${id}/add_comment/`;
       const response = await axios.post(
         apiUrl,
         commentData,
