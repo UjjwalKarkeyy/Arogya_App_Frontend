@@ -1,5 +1,5 @@
 import { Redirect } from 'expo-router';
 
 export default function VideosScreen() {
-  return <Redirect href="/educationalContent/" />;
+  return <Redirect href="/eduContent/" />;
 }

@@ -9,14 +9,13 @@ import ChildHealthIcon from '../../assets/icons/child_health.svg';
 import FirstAidIcon from '../../assets/icons/first_aid.svg';
 import HygieneIcon from '../../assets/icons/hygiene.svg';
 import MentalHealthIcon from '../../assets/icons/mental_health.svg';
-import NutritionIcon from '../../assets/icons/nutrition.svg';
+import OutbreakIcon from '../../assets/icons/outbreak.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
 import SearchIcon from '../../assets/icons/search.svg';
 import SeasonalDiseasesIcon from '../../assets/icons/seasonal_diseases.svg';
 
-
 const categories = [
-  { name: 'Nutrition', icon: <NutritionIcon width={40} height={40} stroke="#4CAF50" strokeWidth="2" fill="none" /> },
+  { name: 'Outbreak Alert', icon: <OutbreakIcon width={40} height={40} stroke="#4CAF50" strokeWidth="2" fill="none" /> },
   { name: 'Complain/Feedback', icon: <HygieneIcon width={40} height={40} stroke="#2196F3" strokeWidth="2" fill="none" /> },
   { name: 'Child Health', icon: <ChildHealthIcon width={40} height={40} stroke="#FF9800" strokeWidth="2" fill="none" /> },
   { name: 'Mental Health', icon: <MentalHealthIcon width={40} height={40} stroke="#9C27B0" strokeWidth="2" fill="none" /> },
@@ -30,7 +29,8 @@ export default function HomeScreen() {
   const handleCategoryPress = (categoryName: string) => {
     if (categoryName === 'Complain/Feedback') {
       router.push('../complain/complainAndFeedback');
-    }
+    } else if (categoryName === "Outbreak Alert") {
+      router.push("../outbreak/")}
     // Add other category navigation here as needed
   };
 
