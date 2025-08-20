@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { Doctor, Specialty, ApiResponse, AppointmentSlot } from '../types';
 
 // API Configuration
 const getApiUrl = (): string => {
@@ -191,6 +192,222 @@ export const healthApi = {
   getYouTubeThumbnail: (url: string, quality: 'default' | 'mqdefault' | 'hqdefault' | 'sddefault' | 'maxresdefault' = 'hqdefault'): string => {
     const videoId = healthApi.getYouTubeVideoId(url);
     return videoId ? `https://img.youtube.com/vi/${videoId}/${quality}.jpg` : '';
+  }
+};
+
+export const fetchDoctors = async (): Promise<Doctor[]> => {
+  console.log('Fetching doctors from:', `${API_BASE_URL}/doctors/`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/doctors/`);
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+    }
+    
+    const responseData = await response.json();
+    console.log('Doctors data received:', responseData);
+    
+    // Handle the success/data format
+    if (responseData && responseData.success && responseData.data) {
+      const data = responseData.data;
+      
+      // If data is an array, process it directly
+      if (Array.isArray(data)) {
+        return data.map((doctor: any): Doctor => ({
+          id: doctor.id || doctor.pk,
+          name: doctor.name || doctor.doctor_name || 'Unknown Doctor',
+          specialty_name: doctor.specialty_name || doctor.specialty?.name || 'General Practitioner',
+          specialty: doctor.specialty,
+          rating: doctor.rating || '4.5',
+          reviews: doctor.reviews || '100+',
+          price: doctor.price || 500,
+          opd_time: doctor.opd_time || 'Mon-Fri 9AM-5PM',
+          bio: doctor.bio || 'Experienced healthcare professional',
+          experience: doctor.experience || '5+ years',
+          education: doctor.education || 'MBBS',
+          location: doctor.location || 'Kathmandu'
+        }));
+      }
+      
+      // If data is an object, check for common patterns
+      if (typeof data === 'object') {
+        // Check for nested results array
+        if (data.results && Array.isArray(data.results)) {
+          return data.results.map((doctor: any): Doctor => ({
+            id: doctor.id || doctor.pk,
+            name: doctor.name || doctor.doctor_name || 'Unknown Doctor',
+            specialty_name: doctor.specialty_name || doctor.specialty?.name || 'General Practitioner',
+            specialty: doctor.specialty,
+            rating: doctor.rating || '4.5',
+            reviews: doctor.reviews || '100+',
+            price: doctor.price || 500,
+            opd_time: doctor.opd_time || 'Mon-Fri 9AM-5PM',
+            bio: doctor.bio || 'Experienced healthcare professional',
+            experience: doctor.experience || '5+ years',
+            education: doctor.education || 'MBBS',
+            location: doctor.location || 'Kathmandu'
+          }));
+        }
+        
+        // Check for any array in the data object
+        const possibleArray = Object.values(data).find(Array.isArray);
+        if (possibleArray) {
+          return possibleArray.map((doctor: any): Doctor => ({
+            id: doctor.id || doctor.pk,
+            name: doctor.name || doctor.doctor_name || 'Unknown Doctor',
+            specialty_name: doctor.specialty_name || doctor.specialty?.name || 'General Practitioner',
+            specialty: doctor.specialty,
+            rating: doctor.rating || '4.5',
+            reviews: doctor.reviews || '100+',
+            price: doctor.price || 500,
+            opd_time: doctor.opd_time || 'Mon-Fri 9AM-5PM',
+            bio: doctor.bio || 'Experienced healthcare professional',
+            experience: doctor.experience || '5+ years',
+            education: doctor.education || 'MBBS',
+            location: doctor.location || 'Kathmandu'
+          }));
+        }
+      }
+    }
+    
+    // If responseData is directly an array
+    if (Array.isArray(responseData)) {
+      return responseData.map((doctor: any): Doctor => ({
+        id: doctor.id || doctor.pk,
+        name: doctor.name || doctor.doctor_name || 'Unknown Doctor',
+        specialty_name: doctor.specialty_name || doctor.specialty?.name || 'General Practitioner',
+        specialty: doctor.specialty,
+        rating: doctor.rating || '4.5',
+        reviews: doctor.reviews || '100+',
+        price: doctor.price || 500,
+        opd_time: doctor.opd_time || 'Mon-Fri 9AM-5PM',
+        bio: doctor.bio || 'Experienced healthcare professional',
+        experience: doctor.experience || '5+ years',
+        education: doctor.education || 'MBBS',
+        location: doctor.location || 'Kathmandu'
+      }));
+    }
+    
+    // If responseData is an object, check for common patterns
+    if (typeof responseData === 'object') {
+      // Check for nested results array
+      if (responseData.results && Array.isArray(responseData.results)) {
+        return responseData.results.map((doctor: any): Doctor => ({
+          id: doctor.id || doctor.pk,
+          name: doctor.name || doctor.doctor_name || 'Unknown Doctor',
+          specialty_name: doctor.specialty_name || doctor.specialty?.name || 'General Practitioner',
+          specialty: doctor.specialty,
+          rating: doctor.rating || '4.5',
+          reviews: doctor.reviews || '100+',
+          price: doctor.price || 500,
+          opd_time: doctor.opd_time || 'Mon-Fri 9AM-5PM',
+          bio: doctor.bio || 'Experienced healthcare professional',
+          experience: doctor.experience || '5+ years',
+          education: doctor.education || 'MBBS',
+          location: doctor.location || 'Kathmandu'
+        }));
+      }
+      
+      // Check for any array in the responseData object
+      const possibleArray = Object.values(responseData).find(Array.isArray);
+      if (possibleArray) {
+        return possibleArray.map((doctor: any): Doctor => ({
+          id: doctor.id || doctor.pk,
+          name: doctor.name || doctor.doctor_name || 'Unknown Doctor',
+          specialty_name: doctor.specialty_name || doctor.specialty?.name || 'General Practitioner',
+          specialty: doctor.specialty,
+          rating: doctor.rating || '4.5',
+          reviews: doctor.reviews || '100+',
+          price: doctor.price || 500,
+          opd_time: doctor.opd_time || 'Mon-Fri 9AM-5PM',
+          bio: doctor.bio || 'Experienced healthcare professional',
+          experience: doctor.experience || '5+ years',
+          education: doctor.education || 'MBBS',
+          location: doctor.location || 'Kathmandu'
+        }));
+      }
+    }
+    
+    console.warn('Unexpected API response format for doctors:', responseData);
+    return [];
+  } catch (error) {
+    console.error('Error in fetchDoctors:', error);
+    throw error;
+  }
+};
+
+export const fetchSpecialties = async (): Promise<Specialty[]> => {
+  console.log('Fetching specialties from:', `${API_BASE_URL}/specialties/`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/specialties/`);
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+    }
+    
+    const responseData = await response.json();
+    console.log('Specialties data received:', responseData);
+    
+    // Handle the success/data format
+    if (responseData && responseData.success && responseData.data) {
+      const data = responseData.data;
+      
+      // If data is an array, process it directly
+      if (Array.isArray(data)) {
+        return data.map((item: any): Specialty => ({
+          id: item.id || item.pk,
+          name: item.name || item.specialty_name || 'Unnamed Specialty'
+        }));
+      }
+      
+      // If data is an object, check for common patterns
+      if (typeof data === 'object') {
+        // Check for nested results array
+        if (data.results && Array.isArray(data.results)) {
+          return data.results.map((item: any): Specialty => ({
+            id: item.id || item.pk,
+            name: item.name || item.specialty_name || 'Unnamed Specialty'
+          }));
+        }
+        
+        // Check for any array in the data object
+        const possibleArray = Object.values(data).find(Array.isArray);
+        if (possibleArray) {
+          return possibleArray.map((item: any): Specialty => ({
+            id: item.id || item.pk,
+            name: item.name || item.specialty_name || 'Unnamed Specialty'
+          }));
+        }
+      }
+    }
+    
+    console.warn('Unexpected API response format for specialties:', responseData);
+    return [];
+  } catch (error) {
+    console.error('Error in fetchSpecialties:', error);
+    return [];
+  }
+};
+
+export const fetchAvailableSlots = async (doctorId: number, date: string): Promise<AppointmentSlot[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/appointments/available-slots/?doctor_id=${doctorId}&date=${date}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.slots || [];
+  } catch (error) {
+    console.error('Error fetching available slots:', error);
+    return [];
   }
 };
 

@@ -18,7 +18,7 @@ const categories = [
   { name: 'Outbreak Alert', icon: <OutbreakIcon width={40} height={40} stroke="#4CAF50" strokeWidth="2" fill="none" /> },
   { name: 'Complain/Feedback', icon: <HygieneIcon width={40} height={40} stroke="#2196F3" strokeWidth="2" fill="none" /> },
   { name: 'Disease Dashboard', icon: <ChildHealthIcon width={40} height={40} stroke="#FF9800" strokeWidth="2" fill="none" /> },
-  { name: 'Mental Health', icon: <MentalHealthIcon width={40} height={40} stroke="#9C27B0" strokeWidth="2" fill="none" /> },
+  { name: 'Doctors', icon: <MentalHealthIcon width={40} height={40} stroke="#9C27B0" strokeWidth="2" fill="none" /> },
   { name: 'First Aid', icon: <FirstAidIcon width={40} height={40} stroke="#F44336" strokeWidth="2" fill="none" /> },
   { name: 'Seasonal Diseases', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
 ];
@@ -33,6 +33,8 @@ export default function HomeScreen() {
       router.push("../outbreak/")
     } else if (categoryName === "Disease Dashboard") {
       router.push("../disease_dashboard/dashboard")
+    } else if(categoryName === "Doctors"){
+      router.push("../doctors/");
     }
     // Add other category navigation here as needed
   };
