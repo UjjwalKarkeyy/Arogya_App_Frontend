@@ -17,7 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import { API_ENDPOINTS } from "../../config/api";
+import { API_ENDPOINTS } from "../../config/healthApi";
 
 // ✅ Helper function to guess mime type
 const getMimeType = (fileUri) => {

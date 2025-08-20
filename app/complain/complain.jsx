@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, FlatList, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import { API_ENDPOINTS } from "../../config/api";
+import { API_ENDPOINTS } from "../../config/healthApi";
 import Feather from '@expo/vector-icons/Feather';
 import React, { useEffect, useState } from 'react'
 
