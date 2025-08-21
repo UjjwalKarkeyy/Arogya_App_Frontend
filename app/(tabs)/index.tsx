@@ -20,6 +20,7 @@ const categories = [
   { name: 'Disease Dashboard', icon: <ChildHealthIcon width={40} height={40} stroke="#FF9800" strokeWidth="2" fill="none" /> },
   { name: 'Doctors', icon: <MentalHealthIcon width={40} height={40} stroke="#9C27B0" strokeWidth="2" fill="none" /> },
   { name: 'Survey', icon: <FirstAidIcon width={40} height={40} stroke="#F44336" strokeWidth="2" fill="none" /> },
+  { name: 'Free Medicine', icon: <FirstAidIcon width={40} height={40} stroke="#F44336" strokeWidth="2" fill="none" /> },
   { name: 'Seasonal Diseases', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
 ];
 
@@ -37,6 +38,8 @@ export default function HomeScreen() {
       router.push("../doctors/");
     } else if(categoryName === "Survey"){
       router.push("../surveyForm/")
+    } else if(categoryName === "Free Medicine"){
+      router.push("../FreeMedicine/")
     }
     // Add other category navigation here as needed
   };

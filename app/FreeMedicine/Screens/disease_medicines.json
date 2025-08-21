@@ -1,0 +1,36 @@
+{
+  "Cancer": [
+    "Painkillers",
+    "Antiemetics",
+    "Steroids"
+  ],
+  "Kidney Disease": [
+    "Frusemide",
+    "Losartan"
+  ],
+  "Alzheimer's": [
+    "Donepezil",
+    "Memantine"
+  ],
+  "Heart Disease": [
+    "Amlodipine",
+    "Losartan",
+    "Frusemide"
+  ],
+  "Parkinson's": [
+    "Levodopa",
+    "Carbidopa"
+  ],
+  "Spinal Injury": [
+    "Pain relief",
+    "Muscle relaxants"
+  ],
+  "Head Injury": [
+    "Steroids",
+    "Anticonvulsants"
+  ],
+  "Sickle Cell Disease": [
+    "Folic Acid",
+    "Pain relief"
+  ]
+}
