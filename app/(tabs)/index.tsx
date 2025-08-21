@@ -22,6 +22,7 @@ const categories = [
   { name: 'Survey', icon: <FirstAidIcon width={40} height={40} stroke="#F44336" strokeWidth="2" fill="none" /> },
   { name: 'Lab Result', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'News Update', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
+  { name: 'Helpline', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
 ];
 
 export default function HomeScreen() {
@@ -31,17 +32,19 @@ export default function HomeScreen() {
     if (categoryName === 'Complain/Feedback') {
       router.push('../complain/complainAndFeedback');
     } else if (categoryName === "Outbreak Alert") {
-      router.push("../outbreak/")
+      router.push("../outbreak/");
     } else if (categoryName === "Disease Dashboard") {
-      router.push("../disease_dashboard/dashboard")
+      router.push("../disease_dashboard/dashboard");
     } else if(categoryName === "Doctors"){
       router.push("../doctors/");
     } else if(categoryName === "Survey"){
-      router.push("../surveyForm/")
+      router.push("../surveyForm/");
     } else if(categoryName === "Lab Result"){
-      router.push('../labResult')
+      router.push('../labResult');
     } else if(categoryName === "News Update"){
-      router.push('../newsUpdate')
+      router.push('../newsUpdate');
+    } else if(categoryName === "Helpline"){
+      router.push('../helpLine');
     }
     // Add other category navigation here as needed
   };
