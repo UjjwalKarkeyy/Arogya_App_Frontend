@@ -21,6 +21,7 @@ const categories = [
   { name: 'Doctors', icon: <MentalHealthIcon width={40} height={40} stroke="#9C27B0" strokeWidth="2" fill="none" /> },
   { name: 'Survey', icon: <FirstAidIcon width={40} height={40} stroke="#F44336" strokeWidth="2" fill="none" /> },
   { name: 'Lab Result', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
+  { name: 'News Update', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
 ];
 
 export default function HomeScreen() {
@@ -39,6 +40,8 @@ export default function HomeScreen() {
       router.push("../surveyForm/")
     } else if(categoryName === "Lab Result"){
       router.push('../labResult')
+    } else if(categoryName === "News Update"){
+      router.push('../newsUpdate')
     }
     // Add other category navigation here as needed
   };
