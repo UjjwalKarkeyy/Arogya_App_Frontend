@@ -58,6 +58,7 @@ export const API_ENDPOINTS = {
   COMPLAINS: `${getApiUrl()}/api/complains/`,
   HEALTH: `${getApiUrl()}/api/health/`,
   SURVEYS: `${getApiUrl()}/api/surveys/`,
+  CHAT: `${getApiUrl()}/api/chat/`,
 };
 
 // Helper function to handle API responses
