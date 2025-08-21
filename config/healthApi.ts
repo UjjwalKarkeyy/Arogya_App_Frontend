@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   SIGNUP: `${getApiUrl()}/api/signup/`,
   COMPLAINS: `${getApiUrl()}/api/complains/`,
   HEALTH: `${getApiUrl()}/api/health/`,
+  SURVEYS: `${getApiUrl()}/api/surveys/`,
 };
 
 // Helper function to handle API responses
@@ -409,6 +410,46 @@ export const fetchAvailableSlots = async (doctorId: number, date: string): Promi
     console.error('Error fetching available slots:', error);
     return [];
   }
+};
+
+// Survey API functions
+export const surveyApi = {
+  // Get all surveys
+  getSurveys: async () => {
+    try {
+      console.log(`[API] Fetching surveys from ${API_ENDPOINTS.SURVEYS}`);
+      const response = await fetch(API_ENDPOINTS.SURVEYS, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getSurveys:', error);
+      throw error;
+    }
+  },
+
+  // Create a new survey
+  createSurvey: async (surveyData: any) => {
+    try {
+      console.log(`[API] Creating survey at ${API_ENDPOINTS.SURVEYS}`);
+      const response = await fetch(API_ENDPOINTS.SURVEYS, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(surveyData),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in createSurvey:', error);
+      throw error;
+    }
+  },
 };
 
 export default healthApi;
