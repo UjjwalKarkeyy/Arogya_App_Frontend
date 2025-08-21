@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { Doctor, Specialty, ApiResponse, AppointmentSlot } from '../types';
+import { Doctor, Specialty, AppointmentSlot } from '../types';
 
 // API Configuration
 const getApiUrl = (): string => {
@@ -17,9 +17,41 @@ const getApiUrl = (): string => {
   return 'http://127.0.0.1:8000';
 };
 
+export const API_CONFIG = {
+  BASE_URL: `${getApiUrl()}/api`,
+  ENDPOINTS: {
+    // Authentication
+    LOGIN: '/login/',
+    SIGNUP: '/signup/',
+    
+    // Health content
+    CATEGORIES: '/categories/',
+    CONTENT: '/content/',
+    
+    // News
+    NEWS: '/news/',
+    
+    // Complaints
+    COMPLAINTS: '/complains/',
+    
+    // Surveys
+    SURVEYS: '/surveys/',
+    
+    // Doctors
+    DOCTORS: '/doctors/',
+    SPECIALTIES: '/specialties/',
+    APPOINTMENTS: '/appointments/',
+    
+    // Notifications
+    NOTIFICATIONS: '/notifications/',
+  }
+};
+
+const BASE_URL = API_CONFIG.BASE_URL;
+
 export const API_BASE_URL = `${getApiUrl()}/api`;
 
-// API endpoints
+// API endpoints (keeping for backward compatibility)
 export const API_ENDPOINTS = {
   LOGIN: `${getApiUrl()}/api/login/`,
   SIGNUP: `${getApiUrl()}/api/signup/`,
@@ -49,6 +81,23 @@ const handleResponse = async (response: Response) => {
   
   return response.json();
 };
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  content?: string;
+  published_at: string;
+  image?: string;
+  tags?: Array<{ id: number; name: string }>;
+  category?: Array<{ id: number; name: string }>;
+}
+
+export interface ApiResponse<T> {
+  results: T[];
+  count: number;
+  next?: string;
+  previous?: string;
+}
 
 interface ContentItem {
   id: number;
@@ -102,9 +151,63 @@ export interface Video {
   publishedDate: string;
 }
 
-export const healthApi = {
-  // Get all health categories
-  getCategories: async (): Promise<Category[]> => {
+class HealthApi {
+  private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    try {
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
+        ...options,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  }
+
+  // News endpoints
+  async getNews(): Promise<NewsItem[]> {
+    const response = await this.makeRequest<ApiResponse<NewsItem>>(API_CONFIG.ENDPOINTS.NEWS);
+    return response.results || response as any; // Handle both paginated and non-paginated responses
+  }
+
+  async getNewsById(id: string): Promise<NewsItem> {
+    return this.makeRequest<NewsItem>(`${API_CONFIG.ENDPOINTS.NEWS}${id}/`);
+  }
+
+  // Health content endpoints
+  async getHealthCategories() {
+    return this.makeRequest(API_CONFIG.ENDPOINTS.CATEGORIES);
+  }
+
+  async getMediaContent() {
+    return this.makeRequest(API_CONFIG.ENDPOINTS.CONTENT);
+  }
+
+  // Complaints endpoints
+  async getComplaints() {
+    return this.makeRequest(API_CONFIG.ENDPOINTS.COMPLAINTS);
+  }
+
+  async createComplaint(data: any) {
+    return this.makeRequest(API_CONFIG.ENDPOINTS.COMPLAINTS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Notifications - removed since we only use frontend-based notifications from news
+
+  // Get all health categories (backward compatibility)
+  async getCategories(): Promise<Category[]> {
     try {
       console.log(`[API] Fetching categories from ${API_BASE_URL}/categories/`);
       const response = await fetch(`${API_BASE_URL}/categories/`, {
@@ -119,10 +222,10 @@ export const healthApi = {
       console.error('[API] Error in getCategories:', error);
       throw error; // Re-throw to allow components to handle the error
     }
-  },
+  }
   
   // Get content for a specific category by slug
-  getCategoryContent: async (slug: string): Promise<ContentItem[]> => {
+  async getCategoryContent(slug: string): Promise<ContentItem[]> {
     try {
       console.log(`[API] Fetching content for category: ${slug}`);
       
@@ -141,10 +244,10 @@ export const healthApi = {
       console.error(`[API] Error in getCategoryContent for ${slug}:`, error);
       throw error; // Re-throw to allow components to handle the error
     }
-  },
+  }
   
   // Get featured content
-  getFeaturedContent: async (): Promise<ContentItem[]> => {
+  async getFeaturedContent(): Promise<ContentItem[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/content/featured/`);
       if (!response.ok) {
@@ -155,10 +258,10 @@ export const healthApi = {
       console.error('Error fetching featured content:', error);
       return [];
     }
-  },
+  }
   
   // Search content
-  searchContent: async (query: string): Promise<ContentItem[]> => {
+  async searchContent(query: string): Promise<ContentItem[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/content/search/?q=${encodeURIComponent(query)}`);
       if (!response.ok) {
@@ -169,10 +272,10 @@ export const healthApi = {
       console.error('Error searching content:', error);
       return [];
     }
-  },
+  }
   
   // Increment view count for a content item
-  incrementView: async (contentId: number): Promise<void> => {
+  async incrementView(contentId: number): Promise<void> {
     try {
       await fetch(`${API_BASE_URL}/content/${contentId}/increment_view/`, {
         method: 'POST',
@@ -180,21 +283,23 @@ export const healthApi = {
     } catch (error) {
       console.error('Error incrementing view count:', error);
     }
-  },
+  }
   
   // Helper to extract video ID from YouTube URL
-  getYouTubeVideoId: (url: string): string | null => {
+  getYouTubeVideoId(url: string): string | null {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
-  },
+  }
   
   // Get YouTube thumbnail URL
-  getYouTubeThumbnail: (url: string, quality: 'default' | 'mqdefault' | 'hqdefault' | 'sddefault' | 'maxresdefault' = 'hqdefault'): string => {
-    const videoId = healthApi.getYouTubeVideoId(url);
+  getYouTubeThumbnail(url: string, quality: 'default' | 'mqdefault' | 'hqdefault' | 'sddefault' | 'maxresdefault' = 'hqdefault'): string {
+    const videoId = this.getYouTubeVideoId(url);
     return videoId ? `https://img.youtube.com/vi/${videoId}/${quality}.jpg` : '';
   }
-};
+}
+
+export const healthApi = new HealthApi();
 
 export const fetchDoctors = async (): Promise<Doctor[]> => {
   console.log('Fetching doctors from:', `${API_BASE_URL}/doctors/`);
