@@ -22,6 +22,7 @@ const categories = [
   { name: 'Survey', icon: <FirstAidIcon width={40} height={40} stroke="#F44336" strokeWidth="2" fill="none" /> },
   { name: 'Free Medicine', icon: <FirstAidIcon width={40} height={40} stroke="#F44336" strokeWidth="2" fill="none" /> },
   { name: 'Seasonal Diseases', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
+  { name: 'Lab Result', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
 ];
 
 export default function HomeScreen() {
@@ -40,6 +41,8 @@ export default function HomeScreen() {
       router.push("../surveyForm/")
     } else if(categoryName === "Free Medicine"){
       router.push("../FreeMedicine/")
+    } else if(categoryName === "Lab Result"){
+      router.push('../labResult')
     }
     // Add other category navigation here as needed
   };
