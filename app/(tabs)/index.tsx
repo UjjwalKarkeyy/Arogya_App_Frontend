@@ -1,8 +1,7 @@
-import React from 'react';
+import { useRouter } from "expo-router";
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CategoryCard from '../../components/CategoryCard';
-import { useRouter } from "expo-router";
 
 // SVG Icon imports
 import ChildHealthIcon from '../../assets/icons/child_health.svg';
@@ -13,9 +12,11 @@ import OutbreakIcon from '../../assets/icons/outbreak.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
 import SearchIcon from '../../assets/icons/search.svg';
 import SeasonalDiseasesIcon from '../../assets/icons/seasonal_diseases.svg';
+import VaccineIcon from '../../assets/icons/vaccine.svg';
 
 const categories = [
   { name: 'Outbreak Alert', icon: <OutbreakIcon width={40} height={40} stroke="#4CAF50" strokeWidth="2" fill="none" /> },
+  { name: 'Vaccine', icon: <VaccineIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'Complain/Feedback', icon: <HygieneIcon width={40} height={40} stroke="#2196F3" strokeWidth="2" fill="none" /> },
   { name: 'Disease Dashboard', icon: <ChildHealthIcon width={40} height={40} stroke="#FF9800" strokeWidth="2" fill="none" /> },
   { name: 'Doctors', icon: <MentalHealthIcon width={40} height={40} stroke="#9C27B0" strokeWidth="2" fill="none" /> },
@@ -39,6 +40,8 @@ export default function HomeScreen() {
       router.push("../surveyForm/")
     } else if(categoryName === "Lab Result"){
       router.push('../labResult')
+    }else if (categoryName === "Vaccine") {
+      router.push("./vaccine/");
     }
     // Add other category navigation here as needed
   };

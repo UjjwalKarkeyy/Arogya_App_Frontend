@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { Doctor, Specialty, ApiResponse, AppointmentSlot } from '../types';
+import { AppointmentSlot, Doctor, Specialty } from '../types';
 
 // API Configuration
 const getApiUrl = (): string => {
@@ -26,6 +26,10 @@ export const API_ENDPOINTS = {
   COMPLAINS: `${getApiUrl()}/api/complains/`,
   HEALTH: `${getApiUrl()}/api/health/`,
   SURVEYS: `${getApiUrl()}/api/surveys/`,
+  
+  VACCINATIONS: `${getApiUrl()}/api/vaccinations/`,
+  VACCINES: `${getApiUrl()}/api/vaccines/`,
+  VACCINATION_NOTIFICATIONS: `${getApiUrl()}/api/vaccinations/notifications/`,
 };
 
 // Helper function to handle API responses
