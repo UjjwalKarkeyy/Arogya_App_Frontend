@@ -60,10 +60,10 @@ const MessageTextWithClickableNumbers = ({ text, style }: { text: string; style:
   );
 };
 
-// Replace this with your actual backend endpoint
-const CHAT_API_ENDPOINT = 'http://127.0.0.1:8000/api/chat/'; 
-// TODO: Replace this placeholder with the actual logged-in user's name or ID
-const USERNAME = 'admin';
+import { API_ENDPOINTS, userApi } from '../../config/healthApi';
+
+// Use the API endpoint from config
+const CHAT_API_ENDPOINT = API_ENDPOINTS.CHAT;
 
 export default function MessagingScreen() {
   const router = useRouter();
@@ -77,6 +77,7 @@ export default function MessagingScreen() {
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState('admin'); // Default fallback
   const flatListRef = useRef<FlatList<Message>>(null);
   
   // NOTE: The conversationHistoryRef has been removed.
@@ -108,7 +109,7 @@ export default function MessagingScreen() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: USERNAME, // Sending username
+          username: username, // Sending username
           message: text,      // Sending message
         }),
       });

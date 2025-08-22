@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Doctor, Specialty, AppointmentSlot } from '../types';
 
 // API Configuration
@@ -44,6 +45,7 @@ export const API_CONFIG = {
     
     // Notifications
     NOTIFICATIONS: '/notifications/',
+
   }
 };
 
@@ -59,6 +61,7 @@ export const API_ENDPOINTS = {
   HEALTH: `${getApiUrl()}/api/health/`,
   SURVEYS: `${getApiUrl()}/api/surveys/`,
   CHAT: `${getApiUrl()}/api/chat/`,
+  DEFAULT_PATIENT: `${getApiUrl()}/api/users/default-patient/`,
 };
 
 // Helper function to handle API responses
@@ -153,11 +156,118 @@ export interface Video {
 }
 
 class HealthApi {
+  // Token management
+  public async getAuthToken(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem('auth_token');
+    } catch (error) {
+      console.warn('[API] Failed to get auth token:', error);
+      return null;
+    }
+  }
+
+  public async setAuthToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem('auth_token', token);
+    } catch (error) {
+      console.error('[API] Failed to set auth token:', error);
+    }
+  }
+
+  public async clearAuthToken(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem('auth_token');
+    } catch (error) {
+      console.error('[API] Failed to clear auth token:', error);
+    }
+  }
+
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const token = await this.getAuthToken();
+    console.log('[API] Token for headers:', token);
+    const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+    console.log('[API] Auth headers:', headers);
+    return headers;
+  }
+
+public async post(
+    endpoint: string,
+    body: any = {},
+    init?: RequestInit
+  ): Promise<{ data: any }> {
+    try {
+      const authHeaders = await this.getAuthHeaders();
+      console.log('[API] POST request to:', `${BASE_URL}${endpoint}`);
+      console.log('[API] POST body:', body);
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+          ...(init?.headers || {}),
+        },
+        body: JSON.stringify(body),
+        ...init,
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errJson = await response.json();
+          console.log('[API] POST error response:', errJson);
+          errorMessage = errJson.detail || errJson.message || JSON.stringify(errJson);
+        } catch {}
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      console.log('[API] POST success response:', data);
+      console.log('[API] Response status:', response.status);
+      console.log('[API] Response headers:', Object.fromEntries(response.headers.entries()));
+      return { data }; // ✅ mimic axios response shape
+    } catch (error) {
+      console.error('[API] POST request failed:', error);
+      throw error;
+    }
+  }
+
+  public async get(endpoint: string = '/campaigns/'): Promise<{ data: any }> {
+    try {
+      const authHeaders = await this.getAuthHeaders();
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errJson = await response.json();
+          errorMessage = errJson.detail || errJson.message || JSON.stringify(errJson);
+        } catch {}
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      return { data }; // ✅ mimic axios: response.data
+    } catch (error) {
+      console.error('[API] GET request failed:', error);
+      throw error;
+    }
+  }
+
   private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
     try {
+      const authHeaders = await this.getAuthHeaders();
       const response = await fetch(`${BASE_URL}${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
+          ...authHeaders,
           ...options?.headers,
         },
         ...options,
@@ -553,6 +663,27 @@ export const surveyApi = {
       return handleResponse(response);
     } catch (error) {
       console.error('[API] Error in createSurvey:', error);
+      throw error;
+    }
+  },
+};
+
+// User API functions
+export const userApi = {
+  // Get default patient information
+  getDefaultPatient: async () => {
+    try {
+      console.log(`[API] Fetching default patient from ${API_ENDPOINTS.DEFAULT_PATIENT}`);
+      const response = await fetch(API_ENDPOINTS.DEFAULT_PATIENT, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getDefaultPatient:', error);
       throw error;
     }
   },

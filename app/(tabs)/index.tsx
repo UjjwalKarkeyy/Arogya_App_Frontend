@@ -37,6 +37,7 @@ const categories = [
   { name: 'Lab Result', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'News Update', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'Helpline', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
+  { name: 'Health Camp', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
 ];
 
 interface Tip {
@@ -70,6 +71,8 @@ export default function HomeScreen() {
       router.push('../newsUpdate');
     } else if (categoryName === "Helpline") {
       router.push('../helpLine');
+    } else if(categoryName === "Health Camp"){
+      router.push('../healthCamp')
     }
   };
 
