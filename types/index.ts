@@ -1,19 +1,16 @@
 export interface Doctor {
   id: number;
   name: string;
-  specialty_name?: string;
-  specialty?: {
-    id: number;
-    name: string;
-  };
-  rating?: string | number;
-  reviews?: string | number;
-  price?: number;
-  opd_time?: string;
-  bio?: string;
-  experience?: string;
-  education?: string;
-  location?: string;
+  specialty_name: string;
+  specialty?: Specialty;
+  rating: string;
+  reviews: string;
+  price: number;
+  opd_time: string;
+  bio: string;
+  experience: string;
+  education: string;
+  location: string;
   hospital?: string;
   qualifications?: string;
   languages?: string;
@@ -48,4 +45,47 @@ export interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
+}
+
+// Forum types
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  date_joined: string;
+}
+
+export interface ForumCategory {
+  id: number;
+  name: string;
+  description: string;
+  created_at: string;
+  discussion_count: number;
+}
+
+export interface Discussion {
+  id: number;
+  title: string;
+  content?: string;
+  author: User;
+  category: ForumCategory;
+  created_at: string;
+  updated_at: string;
+  is_pinned: boolean;
+  is_locked: boolean;
+  views: number;
+  reply_count: number;
+  last_reply?: Reply;
+  replies?: Reply[];
+}
+
+export interface Reply {
+  id: number;
+  content: string;
+  author: User;
+  created_at: string;
+  updated_at: string;
+  is_solution: boolean;
 }

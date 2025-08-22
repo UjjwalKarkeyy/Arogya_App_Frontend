@@ -37,6 +37,7 @@ const categories = [
   { name: 'Survey', icon: <FirstAidIcon width={40} height={40} stroke="#F44336" strokeWidth="2" fill="none" /> },
   { name: 'Lab Result', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'News Update', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
+  { name: 'Community Forum', icon: <HygieneIcon width={40} height={40} stroke="#FF6B35" strokeWidth="2" fill="none" /> },
   { name: 'Helpline', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'Health Camp', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'Medicine Reminder', icon: <MedicineReminderIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
@@ -72,6 +73,8 @@ export default function HomeScreen() {
       router.push('../labResult');
     } else if (categoryName === "News Update") {
       router.push('../newsUpdate');
+    } else if (categoryName === "Community Forum") {
+      router.push('../forum');
     } else if (categoryName === "Helpline") {
       router.push('../helpLine');
     } else if(categoryName === "Health Camp"){

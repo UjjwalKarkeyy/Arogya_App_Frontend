@@ -60,6 +60,12 @@ export const API_CONFIG = {
     
     // Tips
     TIPS: '/tips/',
+    
+    // Forum
+    FORUM_CATEGORIES: '/forum/categories/',
+    FORUM_DISCUSSIONS: '/forum/discussions/',
+    FORUM_REPLIES: '/forum/replies/',
+    FORUM_AUTH: '/forum/auth/',
 
   }
 };
@@ -199,7 +205,7 @@ class HealthApi {
     }
   }
 
-  private async getAuthHeaders(): Promise<Record<string, string>> {
+  public async getAuthHeaders(): Promise<Record<string, string>> {
     const token = await this.getAuthToken();
     console.log('[API] Token for headers:', token ? `${token.substring(0, 20)}...` : 'null');
     const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -921,6 +927,148 @@ export const userApi = {
       return handleResponse(response);
     } catch (error) {
       console.error('[API] Error in getDefaultPatient:', error);
+      throw error;
+    }
+  },
+};
+
+// Forum API functions
+export const forumApi = {
+  // Get forum categories
+  getCategories: async () => {
+    try {
+      console.log(`[API] Fetching forum categories from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.FORUM_CATEGORIES}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.FORUM_CATEGORIES}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getCategories:', error);
+      throw error;
+    }
+  },
+
+  // Get discussions with optional category filter
+  getDiscussions: async (categoryId?: number) => {
+    try {
+      let url = `${API_BASE_URL}${API_CONFIG.ENDPOINTS.FORUM_DISCUSSIONS}`;
+      if (categoryId) {
+        url += `?category=${categoryId}`;
+      }
+      
+      console.log(`[API] Fetching discussions from ${url}`);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getDiscussions:', error);
+      throw error;
+    }
+  },
+
+  // Get single discussion
+  getDiscussion: async (id: number) => {
+    try {
+      console.log(`[API] Fetching discussion ${id}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.FORUM_DISCUSSIONS}${id}/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getDiscussion:', error);
+      throw error;
+    }
+  },
+
+  // Create new discussion
+  createDiscussion: async (data: { title: string; content: string; category: number }) => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      console.log(`[API] Creating discussion`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.FORUM_DISCUSSIONS}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in createDiscussion:', error);
+      throw error;
+    }
+  },
+
+  // Get replies for a discussion
+  getReplies: async (discussionId: number) => {
+    try {
+      console.log(`[API] Fetching replies for discussion ${discussionId}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.FORUM_DISCUSSIONS}${discussionId}/replies/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getReplies:', error);
+      throw error;
+    }
+  },
+
+  // Create reply
+  createReply: async (discussionId: number, content: string) => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      console.log(`[API] Creating reply for discussion ${discussionId}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.FORUM_DISCUSSIONS}${discussionId}/replies/`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify({ content }),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in createReply:', error);
+      throw error;
+    }
+  },
+
+  // Get current user
+  getCurrentUser: async () => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      console.log(`[API] Fetching current user`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.FORUM_AUTH}user/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getCurrentUser:', error);
       throw error;
     }
   },
