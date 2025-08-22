@@ -60,10 +60,7 @@ const MessageTextWithClickableNumbers = ({ text, style }: { text: string; style:
   );
 };
 
-import { API_ENDPOINTS, userApi } from '../../config/healthApi';
-
-// Use the API endpoint from config
-const CHAT_API_ENDPOINT = API_ENDPOINTS.CHAT;
+import { helplineApi, userApi } from '../../config/healthApi';
 
 export default function MessagingScreen() {
   const router = useRouter();
@@ -103,22 +100,7 @@ export default function MessagingScreen() {
 
     try {
       // Send the username and the new message to your backend
-      const response = await fetch(CHAT_API_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username, // Sending username
-          message: text,      // Sending message
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await helplineApi.sendMessage(username, text);
       const botText = data.text;
 
       if (!botText) {

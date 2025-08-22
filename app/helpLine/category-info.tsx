@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { helplineApi } from '../../config/healthApi';
 
 interface FAQ {
   id: string;
@@ -53,18 +54,7 @@ export default function CategoryInfoScreen() {
       //   ]
       // }
       // Note: Category name and icon are passed from index.tsx navigation params
-      const response = await fetch(`http://127.0.0.1:8000/api/faq/categories/?category=${encodeURIComponent(category as string)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await helplineApi.getFAQs(category as string);
       
       setCategoryData({
         faqs: data.faqs || []
