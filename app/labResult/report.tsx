@@ -12,8 +12,7 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 } from "react-native";
-
-const API_URL = "http://localhost:8000/api/reports/";
+import { labResultApi } from "../../config/healthApi";
 
 interface ApiReportData {
 	id: number;
@@ -52,11 +51,7 @@ export default function ReportScreen() {
 
 	const fetchReports = async () => {
 		try {
-			const response = await fetch(API_URL);
-			if (!response.ok) {
-				throw new Error("Failed to fetch reports");
-			}
-			const data: ApiReportData[] = await response.json();
+			const data: ApiReportData[] = await labResultApi.getLabReports();
 
 			const transformedData: ReportData[] = data.map((report) => ({
 				id: report.id.toString(),

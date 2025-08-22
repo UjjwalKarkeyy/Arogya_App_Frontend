@@ -14,8 +14,7 @@ import {
 	View,
 	ActivityIndicator,
 } from "react-native";
-
-const API_URL = "http://localhost:8000/api/hospitals/";
+import { labResultApi } from "../../config/healthApi";
 
 interface HospitalData {
 	id: string;
@@ -39,12 +38,17 @@ export default function HospitalScreen() {
 
 	const fetchHospitals = async () => {
 		try {
-			const response = await fetch(API_URL);
-			if (!response.ok) {
-				throw new Error("Failed to fetch hospitals");
-			}
-			const data = await response.json();
-			setHospitalData(data);
+			const data = await labResultApi.getHospitals();
+			// Transform the backend data to match frontend expectations
+			const transformedData = data.map((hospital: any) => ({
+				id: hospital.id.toString(),
+				name: hospital.name,
+				address: hospital.address || 'Address not available',
+				phone: hospital.phone || 'Phone not available',
+				type: hospital.type || 'General',
+				date: new Date().toLocaleDateString(),
+			}));
+			setHospitalData(transformedData);
 		} catch (e: any) {
 			setError(e.message);
 		} finally {

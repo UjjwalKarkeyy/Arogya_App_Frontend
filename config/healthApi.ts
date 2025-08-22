@@ -9,13 +9,15 @@ const getApiUrl = (): string => {
   }
   
   // For Android simulator/emulator, use 10.0.2.2 (Android emulator's host loopback)
-  // For physical devices, use your computer's IP address (192.168.1.73)
+  // For physical devices, use your computer's IP address
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:8000';
+    // Check if running on emulator vs physical device
+    // For now, we'll use the computer's IP address which works for both
+    return 'http://192.168.1.74:8000';
   }
   
-  // For iOS simulator, use localhost
-  return 'http://127.0.0.1:8000';
+  // For iOS simulator and physical devices, use computer's IP address
+  return 'http://192.168.1.74:8000';
 };
 
 export const API_CONFIG = {
@@ -45,6 +47,19 @@ export const API_CONFIG = {
     
     // Notifications
     NOTIFICATIONS: '/notifications/',
+    
+    // Lab Results
+    LAB_TESTS: '/lab-tests/',
+    HOSPITALS: '/hospitals/',
+    LAB_REPORTS: '/reports/',
+    
+    // Helpline
+    HELPLINE_FAQ: '/faq/',
+    HELPLINE_CATEGORIES: '/faq/categories/',
+    HELPLINE_CHAT: '/chat/',
+    
+    // Tips
+    TIPS: '/tips/',
 
   }
 };
@@ -62,6 +77,8 @@ export const API_ENDPOINTS = {
   SURVEYS: `${getApiUrl()}/api/surveys/`,
   CHAT: `${getApiUrl()}/api/chat/`,
   DEFAULT_PATIENT: `${getApiUrl()}/api/users/default-patient/`,
+  HELPLINE_FAQ: `${getApiUrl()}/api/faq/`,
+  HELPLINE_CATEGORIES: `${getApiUrl()}/api/faq/categories/`,
 };
 
 // Helper function to handle API responses
@@ -626,6 +643,179 @@ export const fetchAvailableSlots = async (doctorId: number, date: string): Promi
     console.error('Error fetching available slots:', error);
     return [];
   }
+};
+
+// Lab Result API functions
+export const labResultApi = {
+  // Get all lab tests
+  getLabTests: async () => {
+    try {
+      console.log(`[API] Fetching lab tests from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.LAB_TESTS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.LAB_TESTS}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getLabTests:', error);
+      throw error;
+    }
+  },
+
+  // Get all hospitals
+  getHospitals: async () => {
+    try {
+      console.log(`[API] Fetching hospitals from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.HOSPITALS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.HOSPITALS}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getHospitals:', error);
+      throw error;
+    }
+  },
+
+  // Get lab reports with optional filtering
+  getLabReports: async (hospitalId?: string, testName?: string) => {
+    try {
+      let url = `${API_BASE_URL}${API_CONFIG.ENDPOINTS.LAB_REPORTS}`;
+      const params = new URLSearchParams();
+      
+      if (hospitalId) params.append('hospital_id', hospitalId);
+      if (testName) params.append('test_name', testName);
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+      
+      console.log(`[API] Fetching lab reports from ${url}`);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getLabReports:', error);
+      throw error;
+    }
+  },
+};
+
+// Helpline API functions
+export const helplineApi = {
+  // Get FAQ categories
+  getCategories: async () => {
+    try {
+      console.log(`[API] Fetching FAQ categories from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_CATEGORIES}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_CATEGORIES}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getCategories:', error);
+      throw error;
+    }
+  },
+
+  // Get FAQs by category
+  getFAQs: async (category?: string) => {
+    try {
+      let url = `${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_FAQ}`;
+      if (category) {
+        url += `?category=${encodeURIComponent(category)}`;
+      }
+      
+      console.log(`[API] Fetching FAQs from ${url}`);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getFAQs:', error);
+      throw error;
+    }
+  },
+
+  // Send chat message
+  sendMessage: async (username: string, message: string) => {
+    try {
+      console.log(`[API] Sending chat message to ${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_CHAT}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_CHAT}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          message: message,
+        }),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in sendMessage:', error);
+      throw error;
+    }
+  },
+};
+
+// Tips API functions
+export const tipsApi = {
+  // Get all tips
+  getTips: async () => {
+    try {
+      console.log(`[API] Fetching tips from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.TIPS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.TIPS}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getTips:', error);
+      throw error;
+    }
+  },
+
+  // Create a new tip
+  createTip: async (tipData: { title: string; content: string; is_active?: boolean }) => {
+    try {
+      console.log(`[API] Creating tip at ${API_BASE_URL}${API_CONFIG.ENDPOINTS.TIPS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.TIPS}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tipData),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in createTip:', error);
+      throw error;
+    }
+  },
 };
 
 // Survey API functions

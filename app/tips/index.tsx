@@ -13,17 +13,15 @@ import {
   StatusBar,
   Animated
 } from "react-native";
+import { tipsApi } from "../../config/healthApi";
 
 interface Tip {
   id: number;
   title: string;
   content: string;
   created_at: string;
+  is_active: boolean;
 }
-
-const BASE_URL = Platform.OS === "android"
-  ? "http://10.0.2.2:8000/api"
-  : "http://localhost:8000/api";
 
 export default function TipSlider() {
   const [tips, setTips] = useState<Tip[]>([]);
@@ -36,7 +34,7 @@ export default function TipSlider() {
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
   const currentIndex = useRef(0);
-  const autoSlideTimer = useRef<NodeJS.Timeout | null>(null);
+  const autoSlideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     fetchTips();
@@ -71,17 +69,10 @@ export default function TipSlider() {
   const fetchTips = async (isRefresh = false) => {
     try {
       if (!isRefresh) setLoading(true);
-      const response = await fetch(`${BASE_URL}/tips/`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(10000)
-      });
-
-      if (!response.ok) throw new Error("Server error");
-
-      const data: Tip[] = await response.json();
+      const data = await tipsApi.getTips();
       setTips(data);
-    } catch {
+    } catch (error) {
+      console.error('Error fetching tips:', error);
       Alert.alert("Error", "Failed to load tips.");
     } finally {
       setLoading(false);

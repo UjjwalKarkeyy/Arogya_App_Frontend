@@ -10,8 +10,7 @@ import {
 	ActivityIndicator,
 	ScrollView,
 } from "react-native";
-
-const API_URL = "http://localhost:8000/api/reports/";
+import { API_BASE_URL } from "../../config/healthApi";
 
 export default function ReportDetail() {
 	const { id } = useLocalSearchParams();
@@ -21,7 +20,10 @@ export default function ReportDetail() {
 	useEffect(() => {
 		const fetchReport = async () => {
 			try {
-				const response = await fetch(`${API_URL}${id}/`);
+				const response = await fetch(`${API_BASE_URL}/reports/${id}/`);
+				if (!response.ok) {
+					throw new Error('Failed to fetch report details');
+				}
 				const data = await response.json();
 				setReport(data);
 			} catch (error) {

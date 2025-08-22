@@ -27,6 +27,7 @@ import OutbreakIcon from '../../assets/icons/outbreak.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
 import SearchIcon from '../../assets/icons/search.svg';
 import SeasonalDiseasesIcon from '../../assets/icons/seasonal_diseases.svg';
+import MedicineReminderIcon from '../../assets/icons/medicine_reminder.svg';
 
 const categories = [
   { name: 'Outbreak Alert', icon: <OutbreakIcon width={40} height={40} stroke="#4CAF50" strokeWidth="2" fill="none" /> },
@@ -38,6 +39,8 @@ const categories = [
   { name: 'News Update', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'Helpline', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'Health Camp', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
+  { name: 'Medicine Reminder', icon: <MedicineReminderIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
+  { name: 'Free Medicine', icon: <SeasonalDiseasesIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
 ];
 
 interface Tip {
@@ -73,6 +76,10 @@ export default function HomeScreen() {
       router.push('../helpLine');
     } else if(categoryName === "Health Camp"){
       router.push('../healthCamp')
+    } else if(categoryName === "Medicine Reminder"){
+      router.push('../medicineReminder')
+    } else if(categoryName === "Free Medicine"){
+      router.push('../freeMedicine')
     }
   };
 
@@ -125,11 +132,16 @@ export default function HomeScreen() {
 
   const fetchTips = async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
       const response = await fetch(`${BASE_URL}/tips/`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(10000)
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) throw new Error("Server error");
       const data = await response.json();

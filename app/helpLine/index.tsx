@@ -2,6 +2,7 @@ import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { helplineApi } from '../../config/healthApi';
 
 interface Category {
   id: string;
@@ -36,18 +37,7 @@ export default function HomeScreen() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`http://127.0.0.1:8000/api/faq/categories/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await helplineApi.getCategories();
       // Filter out duplicate categories
       const uniqueCategories = data.faqs?.reduce((acc: Category[], current: Category) => {
         const isDuplicate = acc.find(item => item.category === current.category);
