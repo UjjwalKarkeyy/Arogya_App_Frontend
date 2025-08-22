@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { View } from 'react-native';
 import { Path, Svg } from 'react-native-svg';
+import AppHeader from '../../components/AppHeader';
 
 // --- SVG Icons for Tabs ---
 const HomeIcon = ({ color }) => (
@@ -37,11 +38,18 @@ const QRIcon = ({ color }) => (
     </Svg>
 );
 
+const ProfileIcon = ({ color }) => (
+    <Svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={color} width={28} height={28}>
+        <Path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+    </Svg>
+);
+
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        header: () => <AppHeader />,
         tabBarActiveTintColor: '#000',
         tabBarInactiveTintColor: '#888',
         tabBarStyle: { height: 60, paddingBottom: 5 },
@@ -51,6 +59,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <HomeIcon color={color} />,
+          header: () => <AppHeader title="Home" />,
         }}
       />
       <Tabs.Screen
@@ -58,6 +67,7 @@ export default function TabLayout() {
         options={{
           title: 'Explore',
           tabBarIcon: ({ color }) => <ExploreIcon color={color} />,
+          header: () => <AppHeader title="Explore" />,
         }}
       />
       <Tabs.Screen
@@ -83,6 +93,7 @@ export default function TabLayout() {
               <QRIcon color={'white'} />
             </View>
           ),
+          header: () => <AppHeader title="QR Scanner" />,
         }}
       />
       <Tabs.Screen
@@ -90,6 +101,7 @@ export default function TabLayout() {
         options={{
           title: 'Notifications',
           tabBarIcon: ({ color }) => <NotificationsIcon color={color} />,
+          header: () => <AppHeader title="Notifications" />,
         }}
       />
       <Tabs.Screen
@@ -97,6 +109,7 @@ export default function TabLayout() {
         options={{
           tabBarLabel: 'Learn',
           tabBarIcon: ({ color }) => <VideosIcon color={color}/>,
+          header: () => <AppHeader title="Learn" />,
         }}
       />
     </Tabs>

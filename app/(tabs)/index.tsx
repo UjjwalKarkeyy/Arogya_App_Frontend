@@ -215,21 +215,8 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView>
-
-        {/* Header */}
-        <View style={styles.header}>
-          <ProfileIcon width={40} height={40} />
-
-          {/* Right side: inline health-tips label + language button on same row */}
-          <View style={styles.headerRight}>
-            <Text style={styles.tipsInline} numberOfLines={1}>💡 Daily Health tips</Text>
-            <TouchableOpacity style={styles.languageButton}>
-              <Text style={styles.languageText}>ने/En</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* Tips Slider (moved here, just under the header) */}
         {visible && (
@@ -315,7 +302,7 @@ export default function HomeScreen() {
           ))}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

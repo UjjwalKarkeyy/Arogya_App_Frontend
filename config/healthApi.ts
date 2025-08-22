@@ -858,6 +858,47 @@ export const surveyApi = {
   },
 };
 
+// Authentication API functions
+export const authApi = {
+  // Login user
+  login: async (username: string, password: string) => {
+    try {
+      console.log(`[API] Logging in user: ${username}`);
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in login:', error);
+      throw error;
+    }
+  },
+
+  // Signup user
+  signup: async (username: string, email: string, password: string) => {
+    try {
+      console.log(`[API] Signing up user: ${username}`);
+      const response = await fetch(API_ENDPOINTS.SIGNUP, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in signup:', error);
+      throw error;
+    }
+  },
+};
+
 // User API functions
 export const userApi = {
   // Get default patient information
