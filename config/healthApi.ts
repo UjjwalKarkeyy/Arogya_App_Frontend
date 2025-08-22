@@ -201,9 +201,9 @@ class HealthApi {
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const token = await this.getAuthToken();
-    console.log('[API] Token for headers:', token);
+    console.log('[API] Token for headers:', token ? `${token.substring(0, 20)}...` : 'null');
     const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
-    console.log('[API] Auth headers:', headers);
+    console.log('[API] Auth headers:', Object.keys(headers));
     return headers;
   }
 
@@ -216,6 +216,12 @@ public async post(
       const authHeaders = await this.getAuthHeaders();
       console.log('[API] POST request to:', `${BASE_URL}${endpoint}`);
       console.log('[API] POST body:', body);
+      console.log('[API] POST headers being sent:', { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...authHeaders,
+        ...(init?.headers || {})
+      });
       const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {

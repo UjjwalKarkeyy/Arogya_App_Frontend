@@ -69,7 +69,7 @@ export default function RegistrationCard({ registration }: Props) {
 
       <View style={styles.row}>
         {(cd?.id || registration.campaign) ? (
-          <Link href={{ pathname: '/campaign/[id]', params: { id: String(cd?.id ?? registration.campaign), mode: 'registered' } } as any} asChild>
+          <Link href={{ pathname: '/healthCamp/campaign/[id]', params: { id: String(cd?.id ?? registration.campaign), mode: 'registered' } } as any} asChild>
             <Pressable style={({ pressed }) => [
               styles.btn,
               styles.btnGhost,

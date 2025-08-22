@@ -28,7 +28,7 @@ export default function MyRegistrations() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await healthApi.get('/api/registrations/');
+        const res = await healthApi.get('/registrations/');
         const items = Array.isArray(res.data) ? res.data : [];
         setData(items);
       } catch (e) {
