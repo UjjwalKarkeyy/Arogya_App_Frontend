@@ -31,14 +31,19 @@ export const API_CONFIG = {
     CATEGORIES: '/categories/',
     CONTENT: '/content/',
     
-    // News
-    NEWS: '/news/',
+    // Vaccine endpoints
+    VACCINES: '/vaccines/',
+    VACCINE_RECORDS: '/vaccinations/',
+    VACCINE_NOTIFICATIONS: '/vaccinations/notifications/',
     
-    // Complaints
+    // Notifications
     COMPLAINTS: '/complains/',
     
     // Surveys
     SURVEYS: '/surveys/',
+    
+    // News
+    NEWS: '/news/',
     
     // Doctors
     DOCTORS: '/doctors/',
@@ -1069,6 +1074,148 @@ export const forumApi = {
       return handleResponse(response);
     } catch (error) {
       console.error('[API] Error in getCurrentUser:', error);
+      throw error;
+    }
+  },
+};
+
+// Vaccine API functions
+export const vaccineApi = {
+  // Get all vaccines
+  getVaccines: async () => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      console.log(`[API] Fetching vaccines from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINES}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINES}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getVaccines:', error);
+      throw error;
+    }
+  },
+
+  // Get vaccine records with optional filters
+  getVaccineRecords: async (filters?: { name?: string; date_given?: string; isVerified?: boolean }) => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      let url = `${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINE_RECORDS}`;
+      
+      if (filters) {
+        const params = new URLSearchParams();
+        if (filters.name) params.append('name', filters.name);
+        if (filters.date_given) params.append('date_given', filters.date_given);
+        if (filters.isVerified !== undefined) params.append('isVerified', filters.isVerified.toString());
+        
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+      }
+      
+      console.log(`[API] Fetching vaccine records from ${url}`);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getVaccineRecords:', error);
+      throw error;
+    }
+  },
+
+  // Create a new vaccine record
+  createVaccineRecord: async (recordData: any) => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      console.log(`[API] Creating vaccine record at ${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINE_RECORDS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINE_RECORDS}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify(recordData),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in createVaccineRecord:', error);
+      throw error;
+    }
+  },
+
+  // Update a vaccine record
+  updateVaccineRecord: async (recordId: string, recordData: any) => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      console.log(`[API] Updating vaccine record ${recordId}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINE_RECORDS}${recordId}/`, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify(recordData),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in updateVaccineRecord:', error);
+      throw error;
+    }
+  },
+
+  // Delete a vaccine record
+  deleteVaccineRecord: async (recordId: string) => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      console.log(`[API] Deleting vaccine record ${recordId}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINE_RECORDS}${recordId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+      });
+      
+      if (response.status === 204) {
+        return { success: true };
+      }
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in deleteVaccineRecord:', error);
+      throw error;
+    }
+  },
+
+  // Get vaccine notifications (upcoming doses)
+  getVaccineNotifications: async () => {
+    try {
+      const authHeaders = await healthApi.getAuthHeaders();
+      console.log(`[API] Fetching vaccine notifications from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINE_NOTIFICATIONS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.VACCINE_NOTIFICATIONS}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getVaccineNotifications:', error);
       throw error;
     }
   },
