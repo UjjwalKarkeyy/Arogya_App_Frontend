@@ -1,4 +1,6 @@
 import { Platform } from 'react-native';
+import { AppointmentSlot, Doctor, Specialty } from '../types';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Doctor, Specialty, AppointmentSlot } from '../types';
 
@@ -75,6 +77,11 @@ export const API_ENDPOINTS = {
   COMPLAINS: `${getApiUrl()}/api/complains/`,
   HEALTH: `${getApiUrl()}/api/health/`,
   SURVEYS: `${getApiUrl()}/api/surveys/`,
+  
+  VACCINATIONS: `${getApiUrl()}/api/vaccinations/`,
+  VACCINES: `${getApiUrl()}/api/vaccines/`,
+  VACCINATION_NOTIFICATIONS: `${getApiUrl()}/api/vaccinations/notifications/`,
+
   CHAT: `${getApiUrl()}/api/chat/`,
   DEFAULT_PATIENT: `${getApiUrl()}/api/users/default-patient/`,
   HELPLINE_FAQ: `${getApiUrl()}/api/faq/`,
