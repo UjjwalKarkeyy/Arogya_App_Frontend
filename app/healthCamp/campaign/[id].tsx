@@ -68,7 +68,7 @@ export default function CampaignDetails() {
 
   const onRegister = async () => {
     try {
-      const resp = await healthApi.post('/api/registrations/', { campaign: campId });
+      const resp = await healthApi.post('/registrations/', { campaign: campId });
       const detail = resp?.data?.detail;
       Alert.alert('Registration', typeof detail === 'string' ? detail : 'Registration successful.');
     } catch (e: any) {

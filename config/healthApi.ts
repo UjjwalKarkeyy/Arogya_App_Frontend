@@ -1,6 +1,4 @@
 import { Platform } from 'react-native';
-import { AppointmentSlot, Doctor, Specialty } from '../types';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Doctor, Specialty, AppointmentSlot } from '../types';
 
@@ -77,11 +75,6 @@ export const API_ENDPOINTS = {
   COMPLAINS: `${getApiUrl()}/api/complains/`,
   HEALTH: `${getApiUrl()}/api/health/`,
   SURVEYS: `${getApiUrl()}/api/surveys/`,
-  
-  VACCINATIONS: `${getApiUrl()}/api/vaccinations/`,
-  VACCINES: `${getApiUrl()}/api/vaccines/`,
-  VACCINATION_NOTIFICATIONS: `${getApiUrl()}/api/vaccinations/notifications/`,
-
   CHAT: `${getApiUrl()}/api/chat/`,
   DEFAULT_PATIENT: `${getApiUrl()}/api/users/default-patient/`,
   HELPLINE_FAQ: `${getApiUrl()}/api/faq/`,
@@ -208,9 +201,9 @@ class HealthApi {
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const token = await this.getAuthToken();
-    console.log('[API] Token for headers:', token);
+    console.log('[API] Token for headers:', token ? `${token.substring(0, 20)}...` : 'null');
     const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
-    console.log('[API] Auth headers:', headers);
+    console.log('[API] Auth headers:', Object.keys(headers));
     return headers;
   }
 
@@ -223,6 +216,12 @@ public async post(
       const authHeaders = await this.getAuthHeaders();
       console.log('[API] POST request to:', `${BASE_URL}${endpoint}`);
       console.log('[API] POST body:', body);
+      console.log('[API] POST headers being sent:', { 
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...authHeaders,
+        ...(init?.headers || {})
+      });
       const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -860,6 +859,47 @@ export const surveyApi = {
       return handleResponse(response);
     } catch (error) {
       console.error('[API] Error in createSurvey:', error);
+      throw error;
+    }
+  },
+};
+
+// Authentication API functions
+export const authApi = {
+  // Login user
+  login: async (username: string, password: string) => {
+    try {
+      console.log(`[API] Logging in user: ${username}`);
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in login:', error);
+      throw error;
+    }
+  },
+
+  // Signup user
+  signup: async (username: string, email: string, password: string) => {
+    try {
+      console.log(`[API] Signing up user: ${username}`);
+      const response = await fetch(API_ENDPOINTS.SIGNUP, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in signup:', error);
       throw error;
     }
   },

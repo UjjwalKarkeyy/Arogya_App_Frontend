@@ -103,7 +103,7 @@ export default function HealthCampaigns() {
       
       setConfirmVisible(false);
       setSelected(null); // Clear selected campaign
-      Alert.alert('Registered', `Registration successful! ID: ${response.data?.id || 'N/A'}`);
+      Alert.alert('Registered', 'Registration successful!');
     } catch (e: any) {
       console.error('Registration error:', e);
       const message = e.message || 'Registration failed';

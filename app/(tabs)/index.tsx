@@ -1,5 +1,3 @@
-import { useRouter } from "expo-router";
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
@@ -18,9 +16,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CategoryCard from '../../components/CategoryCard';
+import { useRouter } from "expo-router";
 
 // SVG Icon imports
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import ChildHealthIcon from '../../assets/icons/child_health.svg';
 import FirstAidIcon from '../../assets/icons/first_aid.svg';
 import HygieneIcon from '../../assets/icons/hygiene.svg';
@@ -29,14 +27,10 @@ import OutbreakIcon from '../../assets/icons/outbreak.svg';
 import ProfileIcon from '../../assets/icons/profile.svg';
 import SearchIcon from '../../assets/icons/search.svg';
 import SeasonalDiseasesIcon from '../../assets/icons/seasonal_diseases.svg';
-import SignoutIcon from '../../assets/icons/signout.svg';
-import VaccineIcon from '../../assets/icons/vaccine.svg';
-
 import MedicineReminderIcon from '../../assets/icons/medicine_reminder.svg';
 
 const categories = [
   { name: 'Outbreak Alert', icon: <OutbreakIcon width={40} height={40} stroke="#4CAF50" strokeWidth="2" fill="none" /> },
-  { name: 'Vaccine', icon: <VaccineIcon width={40} height={40} stroke="#607D8B" strokeWidth="2" fill="none" /> },
   { name: 'Complain/Feedback', icon: <HygieneIcon width={40} height={40} stroke="#2196F3" strokeWidth="2" fill="none" /> },
   { name: 'Disease Dashboard', icon: <ChildHealthIcon width={40} height={40} stroke="#FF9800" strokeWidth="2" fill="none" /> },
   { name: 'Doctors', icon: <MentalHealthIcon width={40} height={40} stroke="#9C27B0" strokeWidth="2" fill="none" /> },
@@ -72,12 +66,6 @@ export default function HomeScreen() {
       router.push("../disease_dashboard/dashboard");
     } else if (categoryName === "Doctors") {
       router.push("../doctors/");
-    } else if(categoryName === "Survey"){
-      router.push("../surveyForm/")
-    } else if(categoryName === "Lab Result"){
-      router.push('../labResult')
-    }else if (categoryName === "Vaccine") {
-      router.push("./vaccine/");
     } else if (categoryName === "Survey") {
       router.push("../surveyForm/");
     } else if (categoryName === "Lab Result") {
@@ -141,11 +129,6 @@ export default function HomeScreen() {
       autoSlideTimer.current = null;
     }
   };
-
-  const handleSignout = async () => {
-    await AsyncStorage.removeItem("token");
-    router.push("/login");
-  }
 
   const fetchTips = async () => {
     try {
@@ -232,24 +215,8 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView>
-
-        {/* Header */}
-        <View style={styles.header}>
-          <ProfileIcon width={40} height={40} />
-
-          <TouchableOpacity style={styles.languageButton}>
-            <Text style={styles.languageText}><SignoutIcon width={20} height={20} onPress={handleSignout} /></Text>
-          </TouchableOpacity>
-          {/* Right side: inline health-tips label + language button on same row */}
-          <View style={styles.headerRight}>
-            <Text style={styles.tipsInline} numberOfLines={1}>💡 Daily Health tips</Text>
-            <TouchableOpacity style={styles.languageButton}>
-              <Text style={styles.languageText}>ने/En</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* Tips Slider (moved here, just under the header) */}
         {visible && (
@@ -335,7 +302,7 @@ export default function HomeScreen() {
           ))}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
