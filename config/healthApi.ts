@@ -1,6 +1,9 @@
 import { Platform } from 'react-native';
 import { AppointmentSlot, Doctor, Specialty } from '../types';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Doctor, Specialty, AppointmentSlot } from '../types';
+
 // API Configuration
 const getApiUrl = (): string => {
   if (Platform.OS === 'web') {
@@ -8,18 +11,66 @@ const getApiUrl = (): string => {
   }
   
   // For Android simulator/emulator, use 10.0.2.2 (Android emulator's host loopback)
-  // For physical devices, use your computer's IP address (192.168.1.73)
+  // For physical devices, use your computer's IP address
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:8000';
+    // Check if running on emulator vs physical device
+    // For now, we'll use the computer's IP address which works for both
+    return 'http://192.168.1.74:8000';
   }
   
-  // For iOS simulator, use localhost
-  return 'http://127.0.0.1:8000';
+  // For iOS simulator and physical devices, use computer's IP address
+  return 'http://192.168.1.74:8000';
 };
+
+export const API_CONFIG = {
+  BASE_URL: `${getApiUrl()}/api`,
+  ENDPOINTS: {
+    // Authentication
+    LOGIN: '/login/',
+    SIGNUP: '/signup/',
+    
+    // Health content
+    CATEGORIES: '/categories/',
+    CONTENT: '/content/',
+    
+    // News
+    NEWS: '/news/',
+    
+    // Complaints
+    COMPLAINTS: '/complains/',
+    
+    // Surveys
+    SURVEYS: '/surveys/',
+    
+    // Doctors
+    DOCTORS: '/doctors/',
+    SPECIALTIES: '/specialties/',
+    APPOINTMENTS: '/appointments/',
+    
+    // Notifications
+    NOTIFICATIONS: '/notifications/',
+    
+    // Lab Results
+    LAB_TESTS: '/lab-tests/',
+    HOSPITALS: '/hospitals/',
+    LAB_REPORTS: '/reports/',
+    
+    // Helpline
+    HELPLINE_FAQ: '/faq/',
+    HELPLINE_CATEGORIES: '/faq/categories/',
+    HELPLINE_CHAT: '/chat/',
+    
+    // Tips
+    TIPS: '/tips/',
+
+  }
+};
+
+const BASE_URL = API_CONFIG.BASE_URL;
 
 export const API_BASE_URL = `${getApiUrl()}/api`;
 
-// API endpoints
+// API endpoints (keeping for backward compatibility)
 export const API_ENDPOINTS = {
   LOGIN: `${getApiUrl()}/api/login/`,
   SIGNUP: `${getApiUrl()}/api/signup/`,
@@ -30,6 +81,11 @@ export const API_ENDPOINTS = {
   VACCINATIONS: `${getApiUrl()}/api/vaccinations/`,
   VACCINES: `${getApiUrl()}/api/vaccines/`,
   VACCINATION_NOTIFICATIONS: `${getApiUrl()}/api/vaccinations/notifications/`,
+
+  CHAT: `${getApiUrl()}/api/chat/`,
+  DEFAULT_PATIENT: `${getApiUrl()}/api/users/default-patient/`,
+  HELPLINE_FAQ: `${getApiUrl()}/api/faq/`,
+  HELPLINE_CATEGORIES: `${getApiUrl()}/api/faq/categories/`,
 };
 
 // Helper function to handle API responses
@@ -53,6 +109,23 @@ const handleResponse = async (response: Response) => {
   
   return response.json();
 };
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  content?: string;
+  published_at: string;
+  image?: string;
+  tags?: Array<{ id: number; name: string }>;
+  category?: Array<{ id: number; name: string }>;
+}
+
+export interface ApiResponse<T> {
+  results: T[];
+  count: number;
+  next?: string;
+  previous?: string;
+}
 
 interface ContentItem {
   id: number;
@@ -106,9 +179,170 @@ export interface Video {
   publishedDate: string;
 }
 
-export const healthApi = {
-  // Get all health categories
-  getCategories: async (): Promise<Category[]> => {
+class HealthApi {
+  // Token management
+  public async getAuthToken(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem('auth_token');
+    } catch (error) {
+      console.warn('[API] Failed to get auth token:', error);
+      return null;
+    }
+  }
+
+  public async setAuthToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem('auth_token', token);
+    } catch (error) {
+      console.error('[API] Failed to set auth token:', error);
+    }
+  }
+
+  public async clearAuthToken(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem('auth_token');
+    } catch (error) {
+      console.error('[API] Failed to clear auth token:', error);
+    }
+  }
+
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const token = await this.getAuthToken();
+    console.log('[API] Token for headers:', token);
+    const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+    console.log('[API] Auth headers:', headers);
+    return headers;
+  }
+
+public async post(
+    endpoint: string,
+    body: any = {},
+    init?: RequestInit
+  ): Promise<{ data: any }> {
+    try {
+      const authHeaders = await this.getAuthHeaders();
+      console.log('[API] POST request to:', `${BASE_URL}${endpoint}`);
+      console.log('[API] POST body:', body);
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+          ...(init?.headers || {}),
+        },
+        body: JSON.stringify(body),
+        ...init,
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errJson = await response.json();
+          console.log('[API] POST error response:', errJson);
+          errorMessage = errJson.detail || errJson.message || JSON.stringify(errJson);
+        } catch {}
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      console.log('[API] POST success response:', data);
+      console.log('[API] Response status:', response.status);
+      console.log('[API] Response headers:', Object.fromEntries(response.headers.entries()));
+      return { data }; // ✅ mimic axios response shape
+    } catch (error) {
+      console.error('[API] POST request failed:', error);
+      throw error;
+    }
+  }
+
+  public async get(endpoint: string = '/campaigns/'): Promise<{ data: any }> {
+    try {
+      const authHeaders = await this.getAuthHeaders();
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errJson = await response.json();
+          errorMessage = errJson.detail || errJson.message || JSON.stringify(errJson);
+        } catch {}
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      return { data }; // ✅ mimic axios: response.data
+    } catch (error) {
+      console.error('[API] GET request failed:', error);
+      throw error;
+    }
+  }
+
+  private async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    try {
+      const authHeaders = await this.getAuthHeaders();
+      const response = await fetch(`${BASE_URL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+          ...options?.headers,
+        },
+        ...options,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  }
+
+  // News endpoints
+  async getNews(): Promise<NewsItem[]> {
+    const response = await this.makeRequest<ApiResponse<NewsItem>>(API_CONFIG.ENDPOINTS.NEWS);
+    return response.results || response as any; // Handle both paginated and non-paginated responses
+  }
+
+  async getNewsById(id: string): Promise<NewsItem> {
+    return this.makeRequest<NewsItem>(`${API_CONFIG.ENDPOINTS.NEWS}${id}/`);
+  }
+
+  // Health content endpoints
+  async getHealthCategories() {
+    return this.makeRequest(API_CONFIG.ENDPOINTS.CATEGORIES);
+  }
+
+  async getMediaContent() {
+    return this.makeRequest(API_CONFIG.ENDPOINTS.CONTENT);
+  }
+
+  // Complaints endpoints
+  async getComplaints() {
+    return this.makeRequest(API_CONFIG.ENDPOINTS.COMPLAINTS);
+  }
+
+  async createComplaint(data: any) {
+    return this.makeRequest(API_CONFIG.ENDPOINTS.COMPLAINTS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Notifications - removed since we only use frontend-based notifications from news
+
+  // Get all health categories (backward compatibility)
+  async getCategories(): Promise<Category[]> {
     try {
       console.log(`[API] Fetching categories from ${API_BASE_URL}/categories/`);
       const response = await fetch(`${API_BASE_URL}/categories/`, {
@@ -123,10 +357,10 @@ export const healthApi = {
       console.error('[API] Error in getCategories:', error);
       throw error; // Re-throw to allow components to handle the error
     }
-  },
+  }
   
   // Get content for a specific category by slug
-  getCategoryContent: async (slug: string): Promise<ContentItem[]> => {
+  async getCategoryContent(slug: string): Promise<ContentItem[]> {
     try {
       console.log(`[API] Fetching content for category: ${slug}`);
       
@@ -145,10 +379,10 @@ export const healthApi = {
       console.error(`[API] Error in getCategoryContent for ${slug}:`, error);
       throw error; // Re-throw to allow components to handle the error
     }
-  },
+  }
   
   // Get featured content
-  getFeaturedContent: async (): Promise<ContentItem[]> => {
+  async getFeaturedContent(): Promise<ContentItem[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/content/featured/`);
       if (!response.ok) {
@@ -159,10 +393,10 @@ export const healthApi = {
       console.error('Error fetching featured content:', error);
       return [];
     }
-  },
+  }
   
   // Search content
-  searchContent: async (query: string): Promise<ContentItem[]> => {
+  async searchContent(query: string): Promise<ContentItem[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/content/search/?q=${encodeURIComponent(query)}`);
       if (!response.ok) {
@@ -173,10 +407,10 @@ export const healthApi = {
       console.error('Error searching content:', error);
       return [];
     }
-  },
+  }
   
   // Increment view count for a content item
-  incrementView: async (contentId: number): Promise<void> => {
+  async incrementView(contentId: number): Promise<void> {
     try {
       await fetch(`${API_BASE_URL}/content/${contentId}/increment_view/`, {
         method: 'POST',
@@ -184,21 +418,23 @@ export const healthApi = {
     } catch (error) {
       console.error('Error incrementing view count:', error);
     }
-  },
+  }
   
   // Helper to extract video ID from YouTube URL
-  getYouTubeVideoId: (url: string): string | null => {
+  getYouTubeVideoId(url: string): string | null {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
-  },
+  }
   
   // Get YouTube thumbnail URL
-  getYouTubeThumbnail: (url: string, quality: 'default' | 'mqdefault' | 'hqdefault' | 'sddefault' | 'maxresdefault' = 'hqdefault'): string => {
-    const videoId = healthApi.getYouTubeVideoId(url);
+  getYouTubeThumbnail(url: string, quality: 'default' | 'mqdefault' | 'hqdefault' | 'sddefault' | 'maxresdefault' = 'hqdefault'): string {
+    const videoId = this.getYouTubeVideoId(url);
     return videoId ? `https://img.youtube.com/vi/${videoId}/${quality}.jpg` : '';
   }
-};
+}
+
+export const healthApi = new HealthApi();
 
 export const fetchDoctors = async (): Promise<Doctor[]> => {
   console.log('Fetching doctors from:', `${API_BASE_URL}/doctors/`);
@@ -416,6 +652,179 @@ export const fetchAvailableSlots = async (doctorId: number, date: string): Promi
   }
 };
 
+// Lab Result API functions
+export const labResultApi = {
+  // Get all lab tests
+  getLabTests: async () => {
+    try {
+      console.log(`[API] Fetching lab tests from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.LAB_TESTS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.LAB_TESTS}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getLabTests:', error);
+      throw error;
+    }
+  },
+
+  // Get all hospitals
+  getHospitals: async () => {
+    try {
+      console.log(`[API] Fetching hospitals from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.HOSPITALS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.HOSPITALS}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getHospitals:', error);
+      throw error;
+    }
+  },
+
+  // Get lab reports with optional filtering
+  getLabReports: async (hospitalId?: string, testName?: string) => {
+    try {
+      let url = `${API_BASE_URL}${API_CONFIG.ENDPOINTS.LAB_REPORTS}`;
+      const params = new URLSearchParams();
+      
+      if (hospitalId) params.append('hospital_id', hospitalId);
+      if (testName) params.append('test_name', testName);
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+      
+      console.log(`[API] Fetching lab reports from ${url}`);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getLabReports:', error);
+      throw error;
+    }
+  },
+};
+
+// Helpline API functions
+export const helplineApi = {
+  // Get FAQ categories
+  getCategories: async () => {
+    try {
+      console.log(`[API] Fetching FAQ categories from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_CATEGORIES}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_CATEGORIES}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getCategories:', error);
+      throw error;
+    }
+  },
+
+  // Get FAQs by category
+  getFAQs: async (category?: string) => {
+    try {
+      let url = `${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_FAQ}`;
+      if (category) {
+        url += `?category=${encodeURIComponent(category)}`;
+      }
+      
+      console.log(`[API] Fetching FAQs from ${url}`);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getFAQs:', error);
+      throw error;
+    }
+  },
+
+  // Send chat message
+  sendMessage: async (username: string, message: string) => {
+    try {
+      console.log(`[API] Sending chat message to ${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_CHAT}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.HELPLINE_CHAT}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          message: message,
+        }),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in sendMessage:', error);
+      throw error;
+    }
+  },
+};
+
+// Tips API functions
+export const tipsApi = {
+  // Get all tips
+  getTips: async () => {
+    try {
+      console.log(`[API] Fetching tips from ${API_BASE_URL}${API_CONFIG.ENDPOINTS.TIPS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.TIPS}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getTips:', error);
+      throw error;
+    }
+  },
+
+  // Create a new tip
+  createTip: async (tipData: { title: string; content: string; is_active?: boolean }) => {
+    try {
+      console.log(`[API] Creating tip at ${API_BASE_URL}${API_CONFIG.ENDPOINTS.TIPS}`);
+      const response = await fetch(`${API_BASE_URL}${API_CONFIG.ENDPOINTS.TIPS}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tipData),
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in createTip:', error);
+      throw error;
+    }
+  },
+};
+
 // Survey API functions
 export const surveyApi = {
   // Get all surveys
@@ -451,6 +860,27 @@ export const surveyApi = {
       return handleResponse(response);
     } catch (error) {
       console.error('[API] Error in createSurvey:', error);
+      throw error;
+    }
+  },
+};
+
+// User API functions
+export const userApi = {
+  // Get default patient information
+  getDefaultPatient: async () => {
+    try {
+      console.log(`[API] Fetching default patient from ${API_ENDPOINTS.DEFAULT_PATIENT}`);
+      const response = await fetch(API_ENDPOINTS.DEFAULT_PATIENT, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('[API] Error in getDefaultPatient:', error);
       throw error;
     }
   },

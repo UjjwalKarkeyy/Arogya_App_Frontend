@@ -14,8 +14,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-
-const API_URL = "http://localhost:8000/api/lab-tests/";
+import { labResultApi } from "../../config/healthApi";
 
 interface LabTestData {
 	id: string;
@@ -39,12 +38,16 @@ export default function LabScreen() {
 
 	const fetchTests = async () => {
 		try {
-			const response = await fetch(API_URL);
-			if (!response.ok) {
-				throw new Error("Failed to fetch lab tests");
-			}
-			const data = await response.json();
-			setTestData(data);
+			const data = await labResultApi.getLabTests();
+			// Transform the backend data to match frontend expectations
+			const transformedData = data.map((test: any) => ({
+				id: test.id.toString(),
+				name: test.name,
+				subTests: [], // Backend doesn't have subTests, we'll populate this differently
+				date: new Date().toLocaleDateString(), // Use current date as placeholder
+				status: "Available", // Default status
+			}));
+			setTestData(transformedData);
 		} catch (e: any) {
 			setError(e.message);
 		} finally {
